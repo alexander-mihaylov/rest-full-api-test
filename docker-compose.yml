@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    #container_name: rest-test-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf.prod:/etc/nginx/conf.d/nginx.conf
+      - ./frontend/src:/var/www
+      - ./backend/src:/var/www/api
+
+  backend:
+    build: ./backend
+    #container_name: rest-test-backend
+    restart: unless-stopped
+    volumes:
+      - ./backend/src:/var/www/api
+
+  mysql5.7:
+    image: mysql:5.7.35
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql5.7/etc/mysql:/etc/mysql
+      - ./mysql5.7/logs/mysql:/var/log/mysql
+      - ./mysql5.7/mysql:/var/lib/mysql
+      - ./mysql5.7/mysql-files:/var/lib/mysql-files
+      - ./mysql5.7/data:/docker-entrypoint-initdb.d
+    # задаем пароль для root пользователя
+    # заливку дампа сайта и создание пользователя для доступа к базе снаружи будем делать позже
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: yii2
